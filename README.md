@@ -10,5 +10,5 @@ Projeto desenvolvido como exemplo do Curso Completo de JavaScript na Udemy.com.
 
 -iniciar
 
-git bash: projeto-dropbox-clone\app 
+git bash: projeto-dropbox-clone/app 
     npm start 
