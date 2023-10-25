@@ -8,9 +8,28 @@ class DropBoxController {
     this.namefileEl = this.snackModalEl.querySelector('.filename');
     this.timeleftEl = this.snackModalEl.querySelector('.timeleft');
 
+    this.conectFirebase();
     this.initEvents();
 
   }
+
+  conectFirebase(){
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAn6HzXikaReMQp4guN3CrdHGuUwr0PZ-A",
+      authDomain: "dropbox-clone-8dff9.firebaseapp.com",
+      databaseURL: "https://dropbox-clone-8dff9-default-rtdb.firebaseio.com",
+      projectId: "dropbox-clone-8dff9",
+      storageBucket: "dropbox-clone-8dff9.appspot.com",
+      messagingSenderId: "409661601829",
+      appId: "1:409661601829:web:9ddd51f09d013fe722a7cc",
+      measurementId: "G-TRJP927ZDF"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  };
 
   initEvents() {
 
@@ -22,13 +41,44 @@ class DropBoxController {
 
     this.inputFilesEl.addEventListener('change', (event) => {
 
-      this.uploadTask(event.target.files)
+      this.btnSendFileEl.disabled = true;
+
+      this.uploadTask(event.target.files).then(responses =>{
+
+        responses.forEach(resp =>{
+
+          
+
+          this.getFirebaseRef().push().set(resp.file['input-file']);
+
+        });
+
+        this.uploadCoplete()
+
+      }).catch(err=>{
+
+        this.uploadCoplete()
+        console.error()
+        
+      })
 
       this.modalShow();
 
-      this.inputFilesEl.value = '';
-
     });
+  }
+
+  uploadCoplete(){
+
+    this.modalShow(false);
+
+    this.inputFilesEl.value = '';
+
+    this.btnSendFileEl.disabled = false;
+  }
+
+  getFirebaseRef(){
+
+    return firebase.database().ref('files')
   }
 
   modalShow(show = true){
@@ -50,7 +100,7 @@ class DropBoxController {
 
         ajax.onload = event => {
 
-          this.modalShow(false);
+          
           
           try {
             resolve(JSON.parse(ajax.responseText))
@@ -61,7 +111,7 @@ class DropBoxController {
 
         ajax.onerror = event => {
 
-          this.modalShow(false);
+          
 
           reject(event)
         }
