@@ -7,9 +7,11 @@ class DropBoxController {
     this.progressBarEl = this.snackModalEl.querySelector('.mc-progress-bar-fg');
     this.namefileEl = this.snackModalEl.querySelector('.filename');
     this.timeleftEl = this.snackModalEl.querySelector('.timeleft');
+    this.listFilesEl = document.querySelector('#list-of-files-and-directories');
 
     this.conectFirebase();
     this.initEvents();
+    
 
   }
 
@@ -337,17 +339,93 @@ class DropBoxController {
     }
   }
 
-  getFileView(file){
+  getFileView(file, key){
 
-    return `
-    
-    <li>
+    let li = document.createElement('li')
+
+    li.dataset.key = key
+
+    li.innerHTML =  `
       ${this.getFileIconView(file)}
       <div class="name text-center">Meus Documentos</div>
-    </li>
-    
     `
+    this.initEventsLi(li)
+
+    return li;
   }
+
+  readFiles(){
+
+    this.getFirebaseRef().on('value', snapshot =>{
+
+      this.listFilesEl.innerHTML = '';
+
+      snapshot.forEach(snapshotItem =>{
+
+        let key = snapshotItem.key;
+        let data = snapshotItem.val()
+
+        console.log(key, data);
+
+        this.listFilesEl.appendChild(this.getFileView(data, key))
+
+      })
+
+    })
+  }
+
+  initEventsLi(li){
+
+    li.addEventListener('click', e=>{
+
+      if(e.shiftKey) {
+
+        let firstLi = this.listFilesEl.querySelectorAll('.selected');
+
+        if (firstLi) {
+          
+          let indexStart;
+          let indexEnd;
+          let lis = li.parentElement.childNodes;
+
+          lis.forEach((el, index)=>{
+
+            if (firstLi === el) indexStart = index;
+            if (li === el) indexEnd = index;
+
+          });
+
+          let index = [indexStart, indexEnd].sort();
+
+          lis.forEach((el, index)=>{
+
+            if (i >= index[0] && i <= index[1]) {
+              el.classList.add('selected')
+            }
+
+
+          })
+
+          return true;
+
+        }
+
+      }
+
+      if(!e.ctrlKey) {
+
+        this.listFilesEl.querySelectorAll('li.selected').forEach(e1=>{
+
+          el.classList.remove('selected');
+
+        })
+
+      }
+
+      li.classList.toggle('selected');
+    
+    });
+  };
 
 
 }
